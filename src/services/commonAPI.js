@@ -10,4 +10,4 @@ const commonAPI = async (url,httpMethod,reqBody)=>{
 return await axios(requestConfig).then(res=>res).catch(err=>err)
 }
 
-exort default commonAPI
+export default commonAPI
