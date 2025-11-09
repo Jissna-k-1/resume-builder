@@ -7,38 +7,18 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { TextField } from '@mui/material';
 import { FaXmark } from "react-icons/fa6";
+import { addResumeAPI } from '../services/allAPI';
 
 
 const steps = ['Basic Informations', 'Contact Details', 'Educational Details', 'Work Experience', 'Skills & Certification', 'Review & Submit'];
-function UserInput() {
+function UserInput({resumeDetails, setResumeDetails}) {
     const skillSuggestionArray = ['NODE JS','MONGODB', 'EXPRESS JS','REACT', 'ANGULAR', 'LEADERSHIP', 'COMMUNICATION', 'COACHING','POWER BI','MS EXCEL']
    const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
-  // create a state for storing resume details
-  const [resumeDetails, setResumeDetails]= React.useState({
-    username:"",
-    jobTitle:"",
-    location:"",
-    email:"",
-    mobileNumber:"",
-    github:"",
-    linkedin:"",
-    portfolio:"",
-    course:"",
-    college:"",
-    university:"",
-    passoutYear:"",
-    jobType:"",
-  company:"",
-  clocation:"",
-  duration:"",
-  userSkills:[],
-  summary:""
 
+  // reference to skill input tag
+  const skillRef = React.useRef()
 
-  })
-  console.log(resumeDetails);
-  
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -81,6 +61,22 @@ function UserInput() {
   const handleReset = () => {
     setActiveStep(0);
   };
+
+const addSkill=(skill)=>{
+  if(resumeDetails.userSkills.includes(skill)){
+    alert("The given skill is already added, Please add another!!!")
+  }else{
+setResumeDetails({...resumeDetails,userSkills:[...resumeDetails.userSkills,skill]})
+// to clear add skill text box
+skillRef.current.value =""
+
+  }
+
+}
+const removeSkill=(skill)=>{
+setResumeDetails({...resumeDetails,userSkills:resumeDetails.userSkills.filter(item=>item!=skill)})
+}
+
 
   const renderSteps =(stepCount)=>{
  switch(stepCount){
@@ -135,21 +131,29 @@ function UserInput() {
         <div>
             <h3>Skills</h3>
             <div className="d-flex justify-content-between align-items-center p-3">
-                <input placeholder='Add Skill' type="text" className="form-control" />
-                  <Button variant='text' className='m-2'>ADD</Button>
+                <input ref={skillRef} placeholder='Add Skill' type="text" className="form-control" />
+                  <Button onClick={()=>addSkill(skillRef.current.value)} variant='text' className='m-2'>ADD</Button>
             </div>
               <h5>Suggestions</h5>
                   <div className="d-flex justify-content-between flex-wrap my-3">
                     {
                         skillSuggestionArray.map((item,index)=>(
-                            <Button key={index} variant="outlined" className='m-2'>{item}</Button>
+                            <Button onClick={()=>addSkill(item)} key={index} variant="outlined" className='m-2'>{item}</Button>
                         ))
                     }
                   </div>
                   <h5>Added Skills :</h5>
                   <div className="d-flex justify-content-between flex-wrap my-3">
-                   <Button variant="contained" className='m-1'>NODE JS<FaXmark className='ms-2 cursor-pointer'/></Button>
-                   
+               {
+                resumeDetails.userSkills?.length>0?
+                resumeDetails.userSkills?.map((skill,index)=>(
+                <Button key={index} variant="contained" className='m-1'>{skill}<FaXmark onClick={()=>removeSkill(skill)} className='ms-2 cursor-pointer'/></Button>
+
+                ))
+                :
+                <p className='fw-bolder'>No Skills are added yet!!!</p>
+               }
+                                   
 
 
                   </div>
@@ -167,6 +171,27 @@ function UserInput() {
     default : return null 
  }
   }
+
+const handleAddResume  = ()=>{
+  const {username,jobTitle,location} = resumeDetails
+  if (!username && !jobTitle && !location){
+    alert("please fill the form completely..")
+  }else{
+// api
+console.log("Api Call");
+try{
+const result =  await addResumeAPI(resumeDetails)
+console.log(result);
+
+}catch(error){
+  console.log(error);
+  
+}
+
+  // success redirect view page
+  }
+  
+}
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -223,9 +248,13 @@ function UserInput() {
                 Skip
               </Button>
             )}
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-            </Button>
+
+           {activeStep === steps.length - 1 ?
+           <Button onClick={handleAddResume}>Finish</Button>
+           :<Button onClick={handleNext}>Next</Button>
+           }
+
+
           </Box>
         </React.Fragment>
       )}
