@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { TextField } from '@mui/material';
 import { FaXmark } from "react-icons/fa6";
+import { updateResumeAPI } from '../services/allAPI'
+
 
 
 
@@ -42,6 +44,29 @@ skillRef.current.value =""
 
 const removeSkill=(skill)=>{
 setResumeDetails({...resumeDetails,userSkills:resumeDetails.userSkills.filter(item=>item!=skill)})
+}
+
+const handleResumeUpdate = async ()=>{
+  const {id,username,jobTitle,location} = resumeDetails
+  if(!username && !jobTitle && !location){
+    alert("Please fill the form completely")
+  }else{
+    // api
+    console.log("Api call");
+    try{
+      const result = await updateResumeAPI(id,resumeDetails)
+      console.log(result);
+      if(result.status==200){
+        alert("Resume updated successfully!!!")
+        handleClose()
+      }
+      
+    }catch(err){
+      console.log(err);
+      
+    }
+    
+  }
 }
 
   return (
@@ -134,7 +159,7 @@ setResumeDetails({...resumeDetails,userSkills:resumeDetails.userSkills.filter(it
             </div>
             {/* button update */}
             <div className="text-start">
-                <button className="btn btn-warning">Update</button>
+                <button onClick={handleResumeUpdate} className="btn btn-warning">Update</button>
             </div>
           </Box>
         </Box>
